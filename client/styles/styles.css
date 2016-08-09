@@ -88,10 +88,41 @@ form input[type=text] {
     background-color: #0090da;
 }
 
-.messageContainer > div {
-    display: inline-block
-
+.messageContainer {
+    display: inline-block;
+    font-family: 'Roboto Condensed', sans-serif;
+    background: #D3D3D3;
+    width: 100%;
+    min-height: 50px;
+    margin: 10px 0px;
 }
+
+.username {
+    float: left;
+    margin: 5px;
+    width: 80%;
+    margin-left: 70px;
+}
+
+.messageText {
+    float: left;
+    margin: 5px;
+    margin-left: 70px;
+    width: 80%;
+    min-height: 25px;
+}
+
+.icon {
+    width: 40px;
+    height: 40px;
+    padding: 5px;
+    margin: 5px;
+    background-image: url("chat.png");
+    background-size: 50px 50px;
+    background-repeat: no-repeat;
+    border: 2px solid white;
+}
+
 
 
 /* Dropdown Button */
@@ -140,13 +171,9 @@ form input[type=text] {
     background-color: #3e8e41;
 }
 
-/*.username {
-    display: inline-block
-    padding: 5px;
-    margin: 5px;
+.friendMessage {
+    font-weight: bold;
+    color: blue;
 }
 
-.messageText {
-    display: inline-block;
-}
-*/
+

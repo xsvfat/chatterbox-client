@@ -4,11 +4,24 @@
 
   app.init = function() {
     app.fetch(); 
+    setInterval(app.updateMaster, 5000); 
   };
 
+  app.lastFetch = 0; 
 
   app.server = 'https://api.parse.com/1/classes/messages'; 
+  app.roomList = [];
+  app.currentRoom = undefined;
 
+  app.updateMaster = function() {
+    if (app.currentRoom === undefined) {
+      app.fetch();
+    } else {
+      app.fetch(app.currentRoom);
+    }
+  };
+
+ 
 
   app.send = function(message) {
     $.ajax({
@@ -20,7 +33,8 @@
       contentType: 'application/json',
       success: function (data) {
         console.log('chatterbox: Message sent');
-        app.addMessage(message);
+        //app.addMessage(message);
+        $('.messageContainer:first-child').remove(); 
       },
       error: function (data) {
         // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
@@ -30,7 +44,7 @@
   };
 
 
-  app.fetch = function () {
+  app.fetch = function (selectedRoom) {
     $.ajax({
       // This is the url you should use to communicate with the parse API server.
       url: app.server,
@@ -38,13 +52,28 @@
       dataType: 'json',
       contentType: 'application/json',
       success: function (data, status, xhr) {
-        for (var i = data.results.length - 1; i > data.results.length - 20; i--) {
-          console.log(data.results[i]); 
-          //check to see if the date is more up to date than our last fetched, if so , add
-          //keep track of how many added, and remove old
-          //run this every three seconds?
-          app.addMessage(data.results[i]); 
+        if (selectedRoom !== undefined) {
+          var messageArray = data.results.filter(function(messageData) {
+            if (messageData.roomname === selectedRoom) {
+              return messageData; 
+            }
+          }); 
         }
+        var messageArray = messageArray || data.results; 
+        var ending = Math.min(messageArray.length, 20);
+
+        for (var i = 0; i < ending; i++) {
+         // console.log(data.results[i].roomname);
+          
+          if (Date.parse(messageArray[i].createdAt) > app.lastFetch) {
+            app.addMessage(messageArray[i]); 
+            app.lastFetch > 0 ? $('.messageContainer:first-child').remove() : 0;
+          }
+          app.updateChatRooms(messageArray[i]);
+         
+        }
+        app.lastFetch = Date.parse(messageArray[0].createdAt);
+       
       },
       error: function (data) {
         // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
@@ -52,6 +81,15 @@
       }
     });
   }; 
+
+  app.updateChatRooms = function(obj) {
+    if (app.roomList.indexOf(obj.roomname) === -1 & obj.roomname !== undefined) {
+      app.roomList.push(obj.roomname);
+      var $roomName = $('<a id="rooms"></a>');
+      $roomName.append(document.createTextNode(obj.roomname));
+      $('.dropdown-content').append($roomName);
+    }
+  };
 
 
   app.clearMessages = function () {
@@ -88,7 +126,7 @@
   $(document).ready(function() {
 
     app.init();
-    var savedUsername = location.search.length > 10 ? location.search.slice(10) : "Default Username";
+    var savedUsername = location.search.length <= 9 ? location.search.slice(10) : 'Default Username';
    
     $('body').on('click', '.username', function() { 
       app.addFriend();
@@ -99,13 +137,23 @@
       var messageText = $('#message').val();
       var messageObj = {
         username: savedUsername,
-        text: messageText
-        // roomName: "The Dungeon"
+        text: messageText,
+        roomname: 'The Dungeon'
       };
-      // app.send(messageObj);
+
       app.handleSubmit(messageObj); 
        //e.preventDefault();
     });
+
+    $('body').on('click', '#rooms', function() {
+      app.clearMessages();
+      app.lastFetch = 0; 
+      console.log('clicked');
+      console.log(this);
+      app.currentRoom = $(this).text();
+    });
+      // app.send(messageObj);
+     
   }); 
 
 

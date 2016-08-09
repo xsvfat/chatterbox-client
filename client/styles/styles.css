@@ -88,3 +88,18 @@ form input[type=text] {
     background-color: #0090da;
 }
 
+.messageContainer > div {
+    display: inline-block
+
+}
+
+/*.username {
+    display: inline-block
+    padding: 5px;
+    margin: 5px;
+}
+
+.messageText {
+    display: inline-block;
+}
+*/

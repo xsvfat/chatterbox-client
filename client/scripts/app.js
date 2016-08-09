@@ -33,8 +33,10 @@
       contentType: 'application/json',
       success: function (data) {
         console.log('chatterbox: Message sent');
+        app.fetch();
         //app.addMessage(message);
-        $('.messageContainer:first-child').remove(); 
+        //app.lastFetch = Date.parse(data.createdAt);
+        //$('.messageContainer:first-child').remove(); 
       },
       error: function (data) {
         // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
@@ -63,15 +65,14 @@
         var ending = Math.min(messageArray.length, 20);
 
         for (var i = 0; i < ending; i++) {
-         // console.log(data.results[i].roomname);
-          
           if (Date.parse(messageArray[i].createdAt) > app.lastFetch) {
             app.addMessage(messageArray[i]); 
-            app.lastFetch > 0 ? $('.messageContainer:first-child').remove() : 0;
+            app.removeMessage();
           }
           app.updateChatRooms(messageArray[i]);
          
         }
+
         app.lastFetch = Date.parse(messageArray[0].createdAt);
        
       },
@@ -84,10 +85,7 @@
 
   app.updateChatRooms = function(obj) {
     if (app.roomList.indexOf(obj.roomname) === -1 & obj.roomname !== undefined) {
-      app.roomList.push(obj.roomname);
-      var $roomName = $('<a id="rooms"></a>');
-      $roomName.append(document.createTextNode(obj.roomname));
-      $('.dropdown-content').append($roomName);
+      app.addRoom(obj.roomname);
     }
   };
 
@@ -105,13 +103,20 @@
     $messageText.append(document.createTextNode(message.text));
     $messageContainer.append($username);
     $messageContainer.append($messageText); 
-    $('#chats').append($messageContainer); 
+    $('#chats').append($messageContainer);    
   }; 
 
+  app.removeMessage = function() {
+    if (app.lastFetch > 0) {
+      $('.messageContainer:first-child').remove();
+    } 
+  };
+
   app.addRoom = function (roomName) {
-    var $newRoom = $('<div></div>'); 
-    $newRoom.text(roomName);
-    $('#roomSelect').append($newRoom); 
+    app.roomList.push(roomName);
+    var $roomName = $('<a id="rooms"></a>');
+    $roomName.append(document.createTextNode(roomName));
+    $('.dropdown-content').append($roomName);
   };
 
   app.addFriend = function () {
@@ -142,7 +147,6 @@
       };
 
       app.handleSubmit(messageObj); 
-       //e.preventDefault();
     });
 
     $('body').on('click', '#rooms', function() {
